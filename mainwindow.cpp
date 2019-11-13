@@ -2,15 +2,9 @@
 #include "ui_mainwindow.h"
 #include "installerthread.h"
 
-#include <QDialog>
-#include <QFileDialog>
-#include <QMediaPlayer>
-#include <QDebug>
-#include <QVBoxLayout>
-#include <QThread>
-#include <QPropertyAnimation>
-#include <QState>
-#include "x.h"
+#include <QtCore>
+#include <QtWidgets>
+#include <QtGui>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -144,9 +138,12 @@ void MainWindow::StartInstalation() {
 
     installerThread = new InstallerThread(ui->sourcePath->toPlainText());
 
-    connect(installerThread,SIGNAL(UpdateProgressBar(int,QString)),this,SLOT(UpdateProgressBar(int,QString)));
-    connect(installerThread,SIGNAL(UpdateLabelInfo(QString,QString)),this,SLOT(UpdateLabelInfo(QString,QString)));
-    connect(installerThread,SIGNAL(EnableGUI()),this,SLOT(EnableGUI()));
+    connect(installerThread,SIGNAL(UpdateProgressBar(int)),
+            this,SLOT(UpdateProgressBar(int)));
+    connect(installerThread,SIGNAL(UpdateLabelInfo(QString,QString)),
+            this,SLOT(UpdateLabelInfo(QString,QString)));
+    connect(installerThread,SIGNAL(EnableGUI()),
+            this,SLOT(EnableGUI()));
 
     installerThread->start();
 
@@ -164,8 +161,10 @@ bool MainWindow::IsGothicFolder(QString path) {
 
 bool MainWindow::UserHasUnion(QString path) {
 
-    // TODO
-    return true;
+    return
+      (QFile(path + "/Data/Union.vdf").exists()
+       && QFile(path + "/System/Union.patch").exists());
+
 }
 
 
@@ -220,7 +219,7 @@ void MainWindow::UpdateLabelInfo(QString message, QString cssColor) {
 
 }
 
-void MainWindow::UpdateProgressBar(int add, QString errors) {
+void MainWindow::UpdateProgressBar(int add) {
 
     int val = ui->progressBar->value();
 
@@ -230,6 +229,5 @@ void MainWindow::UpdateProgressBar(int add, QString errors) {
     }
 
     ui->progressBar->setValue(val + add);
-    UpdateLabelInfo(errors,"red");
 
 }

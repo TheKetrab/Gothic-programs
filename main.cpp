@@ -1,8 +1,8 @@
 #include "mainwindow.h"
 
-#include <QApplication>
-#include <QThread>
+#include <QtCore>
 #include <QMediaPlayer>
+#include <QApplication>
 
 int main(int argc, char *argv[])
 {

@@ -31,13 +31,17 @@ void ShortcutMaker::CreateShortcut() {
     if (SUCCEEDED(hres)) {
 
         // ----- SET DATA OF SHORTCUT -----
-        pShellLink->SetPath( L"C:/Gry/G2UcieczkaUnion/System/Gothic2.exe" );
+        std::wstring wPathLocation;
+        std::string sPathLocation = gameLocation + "/System/Gothic2.exe";
+        StringToWString(wPathLocation,sPathLocation);
+        LPCWSTR lpcwstrPathLocation = wPathLocation.c_str();
+        pShellLink->SetPath( lpcwstrPathLocation );
+
         pShellLink->SetArguments( L"-game:Ucieczka.ini" );
 
         int icoId=0;
         std::wstring wIcoLocation;
         std::string sIcoLocation = gameLocation + "/System/Ucieczka.ico";
-
         StringToWString(wIcoLocation,sIcoLocation);
         LPCWSTR lpcwstrIcoLocation = wIcoLocation.c_str();
         pShellLink->SetIconLocation( lpcwstrIcoLocation, icoId );

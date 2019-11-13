@@ -1,13 +1,9 @@
 #include "installerthread.h"
-#include <QThread>
-#include <QFile>
-#include <QDir>
-#include <QThread>
-#include <QDebug>
 #include "mainwindow.h"
-#include <QApplication>
-
 #include "shortcutmaker.h"
+
+#include <QtCore>
+
 
 InstallerThread::InstallerThread(QString instalationPath)
     : instalationPath(instalationPath)
@@ -20,8 +16,10 @@ void InstallerThread::run() {
 
     qDebug() << "InstallerThread Run";
     MoveModToGothic();
+    InstallUnion();
     CreateDesktopIcon();
 
+    // when you're done
     EnableGUI();
 }
 
@@ -33,7 +31,9 @@ bool InstallerThread::CopyFile(QString source, QString destinationDirectory, QSt
     // ----- IF FILE EXISTS -----
     if (QFile::exists(destinationDirectory + filename)) {
         res = false;
-        errors += "Plik " + filename + " już istniał! Został więc nadpisany.";
+        QString error = "Plik " + filename + " już istniał! Został więc nadpisany.";
+        errors += error + "<br>";
+        UpdateLabelInfo(error,"red");
     }
     // ----- -------------- -----
 
@@ -41,6 +41,9 @@ bool InstallerThread::CopyFile(QString source, QString destinationDirectory, QSt
     // ----- DIRECTORY DOESN'T EXISTS -----
     if (!QDir(destinationDirectory).exists()) {
         QDir().mkpath(destinationDirectory);
+        QString error = "Folder " + destinationDirectory + " nie istniał, więc został utworzony.";
+        errors += error + "<br>";
+        UpdateLabelInfo(error,"red");
     }
     // ----- ------------------------ -----
 
@@ -49,7 +52,9 @@ bool InstallerThread::CopyFile(QString source, QString destinationDirectory, QSt
     qDebug() << "source = " << source << " dest = " <<destinationDirectory<<filename;
     if (!QFile::copy(source,destinationDirectory + filename)) {
         res = false;
-        errors += "Powstały problemy przy przenoszeniu pliku " + filename + ".";
+        QString error = "Powstały problemy przy przenoszeniu pliku " + filename + ".";
+        errors += error + "<br>";
+        UpdateLabelInfo(error,"red");
     }
     // ----- ---- -----
 
@@ -67,7 +72,8 @@ void InstallerThread::MoveModToGothic() {
     // G2UcieczkaAfterKap3 = 33MB       3%
     // G2UcieczkaOutro     = 33MB       4%
     // G2UcieczkaCredits   = 27MB       3%
-    // Ucieczka Dubbing    = 568MB     63%
+    // Ucieczka Dubbing    = 568MB     62%
+    // OtherFiles          = 0MB        1%
     //        -----> RAZEM = 905MB -- 100%
 
     QString errors = "";
@@ -75,39 +81,51 @@ void InstallerThread::MoveModToGothic() {
     qDebug() << "Instalacja";
 
     // ----- MOVING MOD FILE -----
-    UpdateLabelInfo("bla","red");
+    UpdateLabelInfo("Przenoszenie paczki z mode.","black");
     CopyFile(":/Ucieczka.mod",instalationPath+"/Data/modvdf/","Ucieczka.mod",errors);
-    UpdateProgressBar(18,errors);
+    UpdateProgressBar(18);
     // ----- --------------- -----
 
 
     // ----- MOVING SOUNDS -----
-    //UpdateLabelInfo("bla");
+    UpdateLabelInfo("Przenoszenie dźwięków.","black");
     CopyFile(":/FREE_MINE_GUITAR.wav",instalationPath+"/_Work/data/Sound/SFX/","FREE_MINE_GUITAR.wav",errors);
-    UpdateProgressBar(2,errors);
+    UpdateProgressBar(2);
     // ----- ------------- -----
 
 
     // ----- MOVING VIDEOS -----
-    //UpdateLabelInfo("bla");
+    UpdateLabelInfo("Przenoszenie plików video.","black");
+
     CopyFile(":/G2UcieczkaIntro.bik",instalationPath+"/_Work/data/Video/","G2UcieczkaIntro.bik",errors);
-    UpdateProgressBar(7,errors);
+    UpdateProgressBar(7);
 
     CopyFile(":/G2UcieczkaAfterKap3.bik",instalationPath+"/_Work/data/Video/","G2UcieczkaAfterKap3.bik",errors);
-    UpdateProgressBar(3,errors);
+    UpdateProgressBar(3);
 
     CopyFile(":/G2UcieczkaOutro.bik",instalationPath+"/_Work/data/Video/","G2UcieczkaOutro.bik",errors);
-    UpdateProgressBar(4,errors);
+    UpdateProgressBar(4);
 
     CopyFile(":/G2UcieczkaCredits.bik",instalationPath+"/_Work/data/Video/","G2UcieczkaCredits.bik",errors);
-    UpdateProgressBar(3,errors);
+    UpdateProgressBar(3);
     // ----- ------------- -----
 
 
     // ----- MOVING DUBBING -----
-    //UpdateLabelInfo("bla");
+    UpdateLabelInfo("Przenoszenie dubbingu.","black");
     CopyFile(":/UcieczkaDubbing.vdf",instalationPath+"/Data/","UcieczkaDubbing.vdf",errors);
-    UpdateProgressBar(63,errors);
+    UpdateProgressBar(62);
+    // ----- -------------- -----
+
+
+    // ----- OTHER FILES -----
+    UpdateLabelInfo("Przenoszenie pomocniczych plików.","black");
+
+    CopyFile(":/G2ULogo.ico",instalationPath+"/System/","Ucieczka.ico",errors);
+    CopyFile(":/Ucieczka.ini",instalationPath+"/System/","Ucieczka.ini",errors);
+    CopyFile(":/Ucieczka.rtf",instalationPath+"/System/","Ucieczka.rtf",errors);
+
+    UpdateProgressBar(1);
     // ----- -------------- -----
 
     qDebug() << errors;
@@ -115,33 +133,23 @@ void InstallerThread::MoveModToGothic() {
 
 }
 
+void InstallerThread::InstallUnion() {
+
+    QString errors;
+    UpdateLabelInfo("Instalacja pakietu Union.","black");
+    CopyFile(":/Union.patch",instalationPath+"/System/","Union.patch",errors);
+    CopyFile(":/Union.vdf",instalationPath+"/Data/","Union.vdf",errors);
+    qDebug() << errors;
+
+}
+
 
 void InstallerThread::CreateDesktopIcon() {
 
+    UpdateLabelInfo("Tworzenie skrótu na pulpicie.","black");
     std::string str = instalationPath.toUtf8().constData();
     ShortcutMaker m(str);
     m.CreateShortcut();
-
-    /*
-    ShellShortcut shortcut = new ShellShortcut(@"S:\foo.lnk");
-    shortcut.Description = "Sample item";
-    shortcut.IconPath = @"S:\my\myDirectory\icon.ico";
-    shortcut.IconIndex = Convert.ToInt32(0);
-    shortcut.Path = @"S:\my\myDirectory\";
-    shortcut.WorkingDirectory = @"S:\my\myDirectory\";
-    shortcut.Save();
-    */
-
-
-
-
-
-
-
-
-
-
-
 
 }
 

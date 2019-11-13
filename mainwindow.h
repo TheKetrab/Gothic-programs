@@ -39,7 +39,7 @@ private slots:
     void on_installButton_clicked();
 public slots:
     void ForceInstalationFromDialog();
-    void UpdateProgressBar(int add, QString errors);
+    void UpdateProgressBar(int add);
     void UpdateLabelInfo(QString message, QString cssColor);
     void EnableGUI();
     void DisableGUI();
