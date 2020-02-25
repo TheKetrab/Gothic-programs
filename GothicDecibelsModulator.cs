@@ -13,7 +13,6 @@ namespace GothicDecibelsModulator
 
     public class Program
     {
-        // TODO timer na osobnym watku
 
         static string inputDir = @"C:\Users\ketra\Desktop\test\input";
         static string outputDir = @"C:\Users\ketra\Desktop\test\output";
@@ -120,6 +119,7 @@ namespace GothicDecibelsModulator
             Console.SetCursorPosition(xTime, yTime);
             TimeSpan time = TimeSpan.FromSeconds(remainingTime);
             Console.Write(time.ToString(@"hh\:mm\:ss"));
+            remainingTime--;
         }
 
 
