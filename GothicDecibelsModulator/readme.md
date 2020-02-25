@@ -1,6 +1,6 @@
 # GothicDecibelsModulator
 
-Program napisany do podgłośnienia 6000 plików dźwiękowych o około 3dB.
+Program napisany do podgłośnienia 6000 plików dźwiękowych o około 3dB.  
 Aby zadziałał poprawnie należy mieć do zmiennych systemowych  
 dodany folder z lokalizacją programu ffmpeg.exe.
 
