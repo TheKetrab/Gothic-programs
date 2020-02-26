@@ -12,4 +12,4 @@ bitrate: 177k
 -> bez metadanych
 ```
 
-<img src="./screen.jpg" alt="" width="400"/>
+<img src="./screen.jpg" alt="" width="200"/>
